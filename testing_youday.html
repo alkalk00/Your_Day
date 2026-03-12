@@ -183,7 +183,7 @@ html,body{width:100%;overflow-x:hidden;background:#1a0010;font-family:'Poppins',
 <div id="countdown-screen">
   <div class="cd-heart">💕</div>
   <h1 class="cd-title">Counting down to her Birthday</h1>
-  <p class="cd-sub">✨ 14th March ✨</p>
+  <p class="cd-sub">✨ 14th March 2026 ✨</p>
   <div class="cd-grid">
     <div class="cd-box"><div class="cd-num" id="cd-d">00</div><div class="cd-label">Days</div></div>
     <div class="cd-box"><div class="cd-num" id="cd-h">00</div><div class="cd-label">Hours</div></div>
@@ -211,7 +211,7 @@ html,body{width:100%;overflow-x:hidden;background:#1a0010;font-family:'Poppins',
 <!-- MAIN PAGE -->
 <div id="main-page">
   <h1 class="main-title">Happy Birthday My Love 💕</h1>
-  <p class="subtitle">✨ 14th March — Today is all about you ✨</p>
+  <p class="subtitle">✨ 14th March 2026 — Today is all about you ✨</p>
 
   <div class="balloons">
     <div class="bal" style="--bd:3s">🎈</div>
@@ -221,16 +221,12 @@ html,body{width:100%;overflow-x:hidden;background:#1a0010;font-family:'Poppins',
     <div class="bal" style="--bd:4s">🎈</div>
   </div>
 
-  <!-- Background Audio -->
-  <audio id="bgMusic" loop>
-    <source src="music/tum_se_hi.mp3" type="audio/mp3">
-  </audio>
-
-  <!-- player UI -->
+  <!-- player -->
   <div class="player">
+    <button class="play-btn" id="playBtn" onclick="toggleMusic()">⏸</button>
     <div class="player-info">
-      <div class="track">🎵 Tum Se Hi</div>
-      <div class="artist">Mohit Chauhan • Jab We Met</div>
+      <div class="track">🎵 Happy Birthday Song</div>
+      <div class="artist">For My Special One</div>
     </div>
     <div class="eq" id="eq">
       <div class="bar" style="--et:.5s"></div>
@@ -293,20 +289,20 @@ html,body{width:100%;overflow-x:hidden;background:#1a0010;font-family:'Poppins',
    Solo = girl alone pics
    ═══════════════════════════════ */
 const couplePhotos = [
-  { src: 'img/img2.jpg',  cap: 'Us together 💕' },
-  { src: 'img/img4.jpg',  cap: 'Shopping days 🛍️' },
-  { src: 'img/img6.jpg',  cap: 'Night out ✨' },
-  { src: 'img/img14.jpg', cap: 'In the hills 🌿' },
+  { src: 'img2.jpg',  cap: 'Us together 💕' },
+  { src: 'img4.jpg',  cap: 'Shopping days 🛍️' },
+  { src: 'img6.jpg',  cap: 'Night out ✨' },
+  { src: 'img14.jpg', cap: 'In the hills 🌿' },
 ];
 const soloPhotos = [
-  { src: 'img/img0.png',  wide: true },
-  { src: 'img/img5.jpg',  wide: false },
-  { src: 'img/img9.jpg',  wide: false },
-  { src: 'img/img7.jpg',  wide: false },
-  { src: 'img/img10.jpg', wide: false },
-  { src: 'img/img3.jpg',  wide: true },
-  { src: 'img/img13.jpg', wide: false },
-  { src: 'img/img15.jpg', wide: false },
+  { src: 'img1.jpg',  wide: true },
+  { src: 'img5.jpg',  wide: false },
+  { src: 'img9.jpg',  wide: false },
+  { src: 'img7.jpg',  wide: false },
+  { src: 'img10.jpg', wide: false },
+  { src: 'img3.jpg',  wide: true },
+  { src: 'img13.jpg', wide: false },
+  { src: 'img15.jpg', wide: false },
 ];
 
 /* BUILD COUPLE GALLERY */
@@ -402,16 +398,11 @@ let actx=null,isPlaying=false,nodes=[];
 const eqEl=document.getElementById('eq');
 const playBtn=document.getElementById('playBtn');
 
-// Soft lyrical melody — "Canon in D" inspired romantic tune
 const melody=[
-  [392,.6],[440,.6],[494,.6],[523,.6],[494,.6],[440,.6],[392,.9],
-  [349,.6],[392,.6],[440,.6],[494,.6],[440,.6],[392,.6],[349,.9],
-  [330,.6],[370,.6],[392,.6],[440,.6],[494,.6],[523,.6],[494,.9],
-  [440,.6],[494,.6],[523,.6],[587,.6],[523,.6],[494,.6],[440,.9],
-  [392,.6],[440,.6],[494,.6],[523,.6],[494,.6],[440,.6],[392,.9],
-  [349,.6],[392,.6],[440,.6],[392,.6],[349,.6],[330,.6],[294,1.2],
-  [330,.6],[370,.6],[392,.6],[440,.6],[392,.6],[370,.6],[330,.9],
-  [294,.6],[330,.6],[370,.6],[392,.6],[370,.6],[330,.6],[294,1.5],
+  [264,.35],[264,.35],[297,.7],[264,.7],[352,.7],[330,1.4],
+  [264,.35],[264,.35],[297,.7],[264,.7],[396,.7],[352,1.4],
+  [264,.35],[264,.35],[528,.7],[440,.7],[352,.7],[330,.7],[297,1.4],
+  [470,.35],[470,.35],[440,.7],[352,.7],[396,.7],[352,1.4]
 ];
 
 function getCtx(){ if(!actx) actx=new(window.AudioContext||window.webkitAudioContext)(); return actx; }
@@ -492,52 +483,7 @@ function animC(){
   if(pieces.length) requestAnimationFrame(animC);
   else cctx.clearRect(0,0,cnv.width,cnv.height);
 }
-function playBalloonPop(){
-  const ctx=getCtx();
-  if(ctx.state==='suspended') ctx.resume();
-  const now=ctx.currentTime;
-
-  // ── main BOOM — big low-freq thud ──
-  const boomLen=ctx.sampleRate*.35;
-  const boomBuf=ctx.createBuffer(1,boomLen,ctx.sampleRate);
-  const bd=boomBuf.getChannelData(0);
-  for(let j=0;j<boomLen;j++) bd[j]=(Math.random()*2-1)*Math.pow(1-j/boomLen,0.6);
-  const boom=ctx.createBufferSource(); boom.buffer=boomBuf;
-  const boomG=ctx.createGain();
-  const boomF=ctx.createBiquadFilter(); boomF.type='lowpass'; boomF.frequency.value=180;
-  boom.connect(boomF); boomF.connect(boomG); boomG.connect(ctx.destination);
-  boomG.gain.setValueAtTime(6.0,now);
-  boomG.gain.exponentialRampToValueAtTime(.001,now+.45);
-  boom.start(now); boom.stop(now+.36);
-
-  // ── snap crack — sharp high transient ──
-  const snapLen=ctx.sampleRate*.04;
-  const snapBuf=ctx.createBuffer(1,snapLen,ctx.sampleRate);
-  const sd=snapBuf.getChannelData(0);
-  for(let j=0;j<snapLen;j++) sd[j]=(Math.random()*2-1)*Math.pow(1-j/snapLen,3);
-  const snap=ctx.createBufferSource(); snap.buffer=snapBuf;
-  const snapG=ctx.createGain();
-  const snapF=ctx.createBiquadFilter(); snapF.type='highpass'; snapF.frequency.value=2000;
-  snap.connect(snapF); snapF.connect(snapG); snapG.connect(ctx.destination);
-  snapG.gain.setValueAtTime(5.0,now);
-  snapG.gain.exponentialRampToValueAtTime(.001,now+.05);
-  snap.start(now); snap.stop(now+.05);
-
-  // ── air rush — white noise hiss fading out ──
-  const rushLen=ctx.sampleRate*.5;
-  const rushBuf=ctx.createBuffer(1,rushLen,ctx.sampleRate);
-  const rd=rushBuf.getChannelData(0);
-  for(let j=0;j<rushLen;j++) rd[j]=(Math.random()*2-1)*Math.pow(1-j/rushLen,1.2);
-  const rush=ctx.createBufferSource(); rush.buffer=rushBuf;
-  const rushG=ctx.createGain();
-  const rushF=ctx.createBiquadFilter(); rushF.type='bandpass'; rushF.frequency.value=1200; rushF.Q.value=.4;
-  rush.connect(rushF); rushF.connect(rushG); rushG.connect(ctx.destination);
-  rushG.gain.setValueAtTime(3.5,now+.02);
-  rushG.gain.exponentialRampToValueAtTime(.001,now+.6);
-  rush.start(now+.02); rush.stop(now+.52);
-}
-
-function burst(){ startConfetti(); playBalloonPop(); }
+function burst(){ startConfetti(); }
 </script>
 </body>
 </html>
