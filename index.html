@@ -1,108 +1,313 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a0010">
+<title>Happy Birthday My Love 💕</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Lato',sans-serif; background:#1a0010; color:#fff; min-height:100vh; overflow-x:hidden; }
-  .screen { display:none; min-height:100vh; width:100%; position:relative; overflow:hidden; }
-  .screen.active { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+  :root {
+    --pink: #ff6699;
+    --pink-dark: #ff3366;
+    --pink-light: #ffb3cc;
+    --pink-pale: #ff99bb;
+    --bg: #1a0010;
+    --bg2: #3d0020;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html, body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: #fff;
+    width: 100%;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .screen {
+    display: none;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+  .screen.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .screen.scroll {
+    justify-content: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* NAV DOTS */
+  .nav-dots {
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 200;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,179,204,.25);
+    transition: all .3s;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .dot.active { background: var(--pink); transform: scale(1.7); }
+
+  /* FLOATING HEARTS */
+  .hearts-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .heart-float { position: absolute; opacity: 0; animation: floatHeart linear infinite; }
+  @keyframes floatHeart {
+    0%   { transform: translateY(100vh) rotate(-15deg); opacity: 0; }
+    10%  { opacity: .5; }
+    90%  { opacity: .25; }
+    100% { transform: translateY(-10vh) rotate(15deg); opacity: 0; }
+  }
 
   /* COUNTDOWN */
-  #s0 { background:radial-gradient(ellipse at center,#3d0020 0%,#1a0010 70%); }
-  .hearts-bg { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
-  .heart-float { position:absolute; opacity:0; animation:floatHeart linear infinite; }
-  @keyframes floatHeart {
-    0%{transform:translateY(100vh) rotate(-15deg);opacity:0}
-    10%{opacity:.6} 90%{opacity:.3}
-    100%{transform:translateY(-10vh) rotate(15deg);opacity:0}
+  #s0 { background: radial-gradient(ellipse at center, var(--bg2) 0%, var(--bg) 70%); }
+  #s0 > * { position: relative; z-index: 1; }
+
+  .tick-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--pink);
+    animation: tickP 1s ease-in-out infinite;
+    margin-bottom: 12px;
   }
-  .cd-label { font-weight:300; font-size:13px; letter-spacing:6px; text-transform:uppercase; color:#ffb3cc; margin-bottom:20px; }
-  .cd-title { font-family:'Playfair Display',serif; font-size:clamp(24px,5.5vw,44px); color:#fff; text-align:center; margin-bottom:40px; line-height:1.3; }
-  .cd-title span { color:#ff6699; font-style:italic; }
-  .cd-ring { position:relative; width:210px; height:210px; margin-bottom:36px; }
-  .cd-ring svg { position:absolute; top:0; left:0; transform:rotate(-90deg); }
-  .ring-bg { fill:none; stroke:#3d1a28; stroke-width:8; }
-  .ring-fill { fill:none; stroke:url(#rg); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
-  .ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .ring-time { font-family:'Playfair Display',serif; font-size:40px; font-weight:700; color:#fff; line-height:1; }
-  .ring-unit { font-size:11px; letter-spacing:3px; color:#ffb3cc; text-transform:uppercase; margin-top:4px; }
-  .cd-boxes { display:flex; gap:16px; margin-bottom:28px; }
-  .cd-box { text-align:center; background:rgba(255,102,153,.1); border:1px solid rgba(255,102,153,.3); border-radius:12px; padding:12px 14px; min-width:64px; }
-  .cd-num { font-family:'Playfair Display',serif; font-size:30px; font-weight:700; color:#ff6699; line-height:1; }
-  .cd-lbl { font-size:10px; letter-spacing:2px; color:#ffb3cc; text-transform:uppercase; margin-top:4px; }
-  .tick-dot { width:10px; height:10px; border-radius:50%; background:#ff6699; animation:tickP 1s ease-in-out infinite; margin-bottom:14px; }
-  @keyframes tickP { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:.5} }
+  @keyframes tickP { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.7);opacity:.4} }
+
+  .cd-label {
+    font-weight: 300;
+    font-size: clamp(10px, 2.8vw, 13px);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--pink-light);
+    margin-bottom: 14px;
+    text-align: center;
+    padding: 0 16px;
+  }
+  .cd-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 6vw, 38px);
+    color: #fff;
+    text-align: center;
+    margin-bottom: 28px;
+    line-height: 1.3;
+    padding: 0 20px;
+  }
+  .cd-title span { color: var(--pink); font-style: italic; }
+
+  .cd-ring {
+    position: relative;
+    width: clamp(160px, 44vw, 200px);
+    height: clamp(160px, 44vw, 200px);
+    margin-bottom: 24px;
+    flex-shrink: 0;
+  }
+  .cd-ring svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); width: 100%; height: 100%; }
+  .ring-bg   { fill: none; stroke: #3d1a28; stroke-width: 8; }
+  .ring-fill { fill: none; stroke: url(#rg); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .ring-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .ring-time { font-family: 'Playfair Display', serif; font-size: clamp(32px, 10vw, 42px); font-weight: 700; color: #fff; line-height: 1; }
+  .ring-unit { font-size: 10px; letter-spacing: 3px; color: var(--pink-light); text-transform: uppercase; margin-top: 4px; }
+
+  .cd-boxes { display: flex; gap: clamp(8px, 2.5vw, 14px); margin-bottom: 20px; flex-wrap: wrap; justify-content: center; padding: 0 12px; }
+  .cd-box {
+    text-align: center;
+    background: rgba(255,102,153,.1);
+    border: 1px solid rgba(255,102,153,.3);
+    border-radius: 10px;
+    padding: 10px;
+    min-width: clamp(54px, 15vw, 64px);
+  }
+  .cd-num { font-family: 'Playfair Display', serif; font-size: clamp(22px, 7vw, 30px); font-weight: 700; color: var(--pink); line-height: 1; }
+  .cd-lbl  { font-size: 9px; letter-spacing: 2px; color: var(--pink-light); text-transform: uppercase; margin-top: 3px; }
 
   /* LOADING */
-  #s1 { background:radial-gradient(ellipse at center,#3d0020 0%,#1a0010 70%); }
-  .ld-heart { font-size:60px; animation:hbeat .8s ease-in-out infinite; margin-bottom:28px; }
-  @keyframes hbeat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
-  .ld-text { font-family:'Playfair Display',serif; font-size:22px; color:#ffb3cc; margin-bottom:22px; text-align:center; padding:0 24px; }
-  .ld-bar-wrap { width:260px; height:4px; background:rgba(255,102,153,.2); border-radius:2px; overflow:hidden; margin-bottom:14px; }
-  .ld-bar { height:100%; width:0%; background:linear-gradient(90deg,#ff3366,#ff99bb); border-radius:2px; transition:width .1s linear; }
-  .ld-hint { font-size:12px; color:rgba(255,179,204,.5); letter-spacing:2px; }
+  #s1 { background: radial-gradient(ellipse at center, var(--bg2) 0%, var(--bg) 70%); }
+  .ld-heart { font-size: clamp(48px, 14vw, 64px); animation: hbeat .8s ease-in-out infinite; margin-bottom: 24px; }
+  @keyframes hbeat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.18)} }
+  .ld-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(16px, 5vw, 22px);
+    color: var(--pink-light);
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 0 28px;
+    line-height: 1.5;
+  }
+  .ld-bar-wrap { width: min(260px, 80vw); height: 4px; background: rgba(255,102,153,.2); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+  .ld-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--pink-dark), var(--pink-pale)); border-radius: 2px; transition: width .1s linear; }
+  .ld-hint { font-size: 11px; color: rgba(255,179,204,.45); letter-spacing: 2px; }
 
   /* CAKE */
-  #s3 { background:radial-gradient(ellipse at center,#3d0020 0%,#1a0010 70%); padding:28px 20px; text-align:center; }
-  .cake-title { font-family:'Playfair Display',serif; font-size:26px; color:#ffb3cc; margin-bottom:6px; }
-  .cake-hint { font-size:12px; color:rgba(255,179,204,.5); letter-spacing:2px; margin-bottom:20px; }
-  .cake-stage { position:relative; width:280px; margin:0 auto 20px; }
-  .balloon-area { display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
-  .balloon { cursor:pointer; animation:sway 3s ease-in-out infinite; display:inline-block; }
+  #s3 {
+    background: radial-gradient(ellipse at center, var(--bg2) 0%, var(--bg) 70%);
+    padding: 24px 16px 20px;
+    text-align: center;
+  }
+  .cake-title { font-family: 'Playfair Display', serif; font-size: clamp(20px, 6vw, 26px); color: var(--pink-light); margin-bottom: 4px; }
+  .cake-hint  { font-size: 11px; color: rgba(255,179,204,.45); letter-spacing: 2px; margin-bottom: 16px; }
+  .cake-stage { width: min(260px, 80vw); margin: 0 auto 16px; flex-shrink: 0; }
+
+  .balloon-area { display: flex; justify-content: center; gap: clamp(10px, 3vw, 16px); flex-wrap: wrap; margin-bottom: 16px; padding: 0 8px; }
+  .balloon { cursor: pointer; animation: sway 3s ease-in-out infinite; display: inline-block; touch-action: manipulation; }
   .balloon:nth-child(2){animation-delay:.5s} .balloon:nth-child(3){animation-delay:1s}
   .balloon:nth-child(4){animation-delay:1.5s} .balloon:nth-child(5){animation-delay:.8s}
   @keyframes sway { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
-  .balloon svg { width:55px; height:72px; }
-  .balloon.popped { animation:pop .3s ease forwards; pointer-events:none; }
+  .balloon svg { width: clamp(44px, 13vw, 55px); height: auto; }
+  .balloon.popped { animation: pop .3s ease forwards; pointer-events: none; }
   @keyframes pop { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.5} 100%{transform:scale(0);opacity:0} }
-  .b-score { font-family:'Playfair Display',serif; font-size:17px; color:#ffb3cc; margin-bottom:14px; }
+  .b-score { font-family: 'Playfair Display', serif; font-size: clamp(14px, 4.5vw, 18px); color: var(--pink-light); margin-bottom: 12px; }
 
-  /* NOTE */
-  #s4 { background:radial-gradient(ellipse at center,#2a001a 0%,#1a0010 70%); padding:40px 24px; }
-  .envelope { width:340px; max-width:92vw; background:linear-gradient(160deg,#fff9f5,#fff0f3); border-radius:8px; padding:38px 28px 28px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,.45); animation:noteIn 1s ease forwards; }
-  @keyframes noteIn { from{opacity:0;transform:translateY(40px) rotate(-2deg)} to{opacity:1;transform:translateY(0) rotate(-1deg)} }
-  .env-seal { position:absolute; top:-18px; left:50%; transform:translateX(-50%); width:36px; height:36px; background:#ff3366; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 4px 12px rgba(255,51,102,.5); }
-  .env-date { font-size:11px; color:#cc7799; letter-spacing:2px; margin-bottom:14px; }
-  .env-dear { font-family:'Playfair Display',serif; font-style:italic; font-size:19px; color:#cc3366; margin-bottom:14px; }
-  .env-body { font-family:'Playfair Display',serif; font-size:14px; line-height:1.95; color:#4a1a30; }
-  .env-sign { font-family:'Playfair Display',serif; font-style:italic; font-size:17px; color:#cc3366; margin-top:18px; text-align:right; }
+  /* LETTER */
+  #s4 {
+    background: radial-gradient(ellipse at center, #2a001a 0%, var(--bg) 70%);
+  }
+  .envelope {
+    width: min(340px, 92vw);
+    background: linear-gradient(160deg, #fff9f5, #fff0f3);
+    border-radius: 10px;
+    padding: clamp(28px, 8vw, 38px) clamp(18px, 6vw, 28px) 24px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    animation: noteIn .9s ease forwards;
+  }
+  @keyframes noteIn { from{opacity:0;transform:translateY(36px) rotate(-2deg)} to{opacity:1;transform:translateY(0) rotate(-1deg)} }
+  .env-seal {
+    position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+    width: 36px; height: 36px; background: var(--pink-dark); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    box-shadow: 0 4px 12px rgba(255,51,102,.5);
+  }
+  .env-date { font-size: 10px; color: #cc7799; letter-spacing: 2px; margin-bottom: 12px; }
+  .env-dear { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(16px, 5vw, 19px); color: #cc3366; margin-bottom: 12px; }
+  .env-body { font-family: 'Playfair Display', serif; font-size: clamp(13px, 3.8vw, 15px); line-height: 1.9; color: #4a1a30; }
+  .env-sign { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(14px, 4.5vw, 17px); color: #cc3366; margin-top: 16px; text-align: right; }
 
   /* GALLERY */
-  #s5 { background:#1a0010; padding:40px 20px; min-height:100vh; }
-  .gal-title { font-family:'Playfair Display',serif; font-size:30px; color:#fff; text-align:center; margin-bottom:6px; }
-  .gal-sub { font-size:11px; letter-spacing:3px; color:#ffb3cc; text-align:center; margin-bottom:28px; text-transform:uppercase; }
-  .gal-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; max-width:380px; width:100%; margin:0 auto 28px; }
-  .gal-cell { aspect-ratio:1; border-radius:8px; overflow:hidden; position:relative; border:1px solid rgba(255,102,153,.2); cursor:pointer; transition:transform .2s; }
-  .gal-cell:hover { transform:scale(1.04); }
-  .gal-ph { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .gal-icon { font-size:24px; opacity:.35; }
-  .gal-lbl { font-size:10px; color:rgba(255,179,204,.4); margin-top:4px; letter-spacing:1px; }
+  #s5 { background: var(--bg); }
+  .gal-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 7vw, 30px); color: #fff; text-align: center; margin-bottom: 4px; }
+  .gal-sub   { font-size: 10px; letter-spacing: 3px; color: var(--pink-light); text-align: center; margin-bottom: 22px; text-transform: uppercase; }
+  .gal-grid  {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    width: min(360px, 92vw);
+    margin: 0 auto 24px;
+  }
+  .gal-cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255,102,153,.2);
+    cursor: pointer;
+    transition: transform .2s;
+    touch-action: manipulation;
+  }
+  .gal-cell:active { transform: scale(.96); }
+  .gal-ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .gal-icon { font-size: clamp(18px, 5.5vw, 26px); opacity: .35; }
+  .gal-lbl  { font-size: 9px; color: rgba(255,179,204,.4); margin-top: 3px; letter-spacing: 1px; }
 
   /* THANKS */
-  #s6 { background:radial-gradient(ellipse at center,#3d0020 0%,#1a0010 70%); padding:40px 20px; text-align:center; }
-  .th-icon { font-size:52px; margin-bottom:22px; animation:flt 3s ease-in-out infinite; }
-  @keyframes flt { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-  .th-big { font-family:'Playfair Display',serif; font-size:clamp(30px,7vw,52px); color:#fff; margin-bottom:10px; }
-  .th-sub { font-family:'Playfair Display',serif; font-style:italic; font-size:19px; color:#ff6699; margin-bottom:20px; }
-  .th-msg { font-size:14px; color:#ffb3cc; line-height:1.9; max-width:300px; text-align:center; margin-bottom:28px; }
-  .th-sign { font-family:'Playfair Display',serif; font-style:italic; font-size:20px; color:#ff99bb; margin-bottom:28px; }
+  #s6 { background: radial-gradient(ellipse at center, var(--bg2) 0%, var(--bg) 70%); padding: 36px 20px; text-align: center; }
+  .th-icon { font-size: clamp(40px, 12vw, 52px); margin-bottom: 18px; animation: flt 3s ease-in-out infinite; }
+  @keyframes flt { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .th-big  { font-family: 'Playfair Display', serif; font-size: clamp(28px, 8vw, 50px); color: #fff; margin-bottom: 8px; }
+  .th-sub  { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(16px, 4.5vw, 20px); color: var(--pink); margin-bottom: 18px; }
+  .th-msg  { font-size: clamp(13px, 3.8vw, 15px); color: var(--pink-light); line-height: 1.9; max-width: 290px; text-align: center; margin-bottom: 22px; }
+  .th-sign { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(16px, 4.5vw, 20px); color: var(--pink-pale); margin-bottom: 24px; }
 
   /* BUTTONS */
-  .btn { background:linear-gradient(135deg,#ff3366,#ff99bb); border:none; border-radius:50px; padding:13px 36px; color:#fff; font-family:'Lato',sans-serif; font-size:14px; letter-spacing:3px; text-transform:uppercase; cursor:pointer; transition:transform .2s,box-shadow .2s; animation:fid 1s 1s ease both; }
-  .btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(255,51,102,.5); }
-  .btn-ghost { background:transparent; border:1px solid rgba(255,102,153,.4); border-radius:50px; padding:10px 26px; color:#ffb3cc; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; cursor:pointer; transition:all .3s; }
-  .btn-ghost:hover { background:rgba(255,102,153,.1); }
-  @keyframes fid { from{opacity:0;transform:translateY(-30px)} to{opacity:1;transform:translateY(0)} }
+  .btn {
+    background: linear-gradient(135deg, var(--pink-dark), var(--pink-pale));
+    border: none; border-radius: 50px;
+    padding: clamp(12px, 3.5vw, 14px) clamp(28px, 8vw, 36px);
+    color: #fff;
+    font-family: 'Lato', sans-serif;
+    font-size: clamp(12px, 3.5vw, 14px);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    touch-action: manipulation;
+    animation: fid 1s 1s ease both;
+    -webkit-appearance: none;
+    min-height: 48px;
+  }
+  .btn:active { transform: scale(.97); box-shadow: 0 4px 18px rgba(255,51,102,.45); }
 
-  /* DOTS */
-  .nav-dots { position:fixed; right:14px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:7px; z-index:100; }
-  .dot { width:6px; height:6px; border-radius:50%; background:rgba(255,179,204,.25); transition:all .3s; cursor:pointer; }
-  .dot.active { background:#ff6699; transform:scale(1.6); }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255,102,153,.4);
+    border-radius: 50px;
+    padding: 12px 26px;
+    color: var(--pink-light);
+    font-family: 'Lato', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .3s;
+    touch-action: manipulation;
+    min-height: 48px;
+    -webkit-appearance: none;
+  }
+  .btn-ghost:active { background: rgba(255,102,153,.1); }
 
-  .confetti-p { position:fixed; width:7px; height:7px; opacity:0; pointer-events:none; z-index:999; border-radius:1px; animation:cfall 1.5s ease-in forwards; }
+  @keyframes fid { from{opacity:0;transform:translateY(-24px)} to{opacity:1;transform:translateY(0)} }
+
+  /* CONFETTI */
+  .confetti-p {
+    position: fixed; width: 7px; height: 7px;
+    opacity: 0; pointer-events: none; z-index: 999;
+    border-radius: 1px;
+    animation: cfall 1.5s ease-in forwards;
+  }
   @keyframes cfall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(420px) rotate(720deg);opacity:0} }
+
+  /* SMALL PHONES */
+  @media (max-width: 380px) {
+    .cd-boxes { gap: 6px; }
+    .cd-box { min-width: 50px; padding: 8px 7px; }
+    .balloon-area { gap: 8px; }
+  }
+  /* SHORT SCREENS */
+  @media (max-height: 680px) {
+    .cd-ring { width: 140px; height: 140px; margin-bottom: 16px; }
+    .cd-boxes { margin-bottom: 14px; }
+    .cd-title { margin-bottom: 18px; }
+    .cake-stage { width: min(220px, 72vw); margin-bottom: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -116,14 +321,14 @@
   <div class="cd-label">✦ A Special Surprise Awaits ✦</div>
   <div class="cd-title">Counting down to<br><span>My Love's</span> Birthday</div>
   <div class="cd-ring">
-    <svg viewBox="0 0 210 210" width="210" height="210">
+    <svg viewBox="0 0 210 210" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#ff3366"/>
           <stop offset="100%" stop-color="#ff99bb"/>
         </linearGradient>
       </defs>
-      <circle class="ring-bg" cx="105" cy="105" r="93"/>
+      <circle class="ring-bg"   cx="105" cy="105" r="93"/>
       <circle class="ring-fill" id="ringC" cx="105" cy="105" r="93" stroke-dasharray="584" stroke-dashoffset="0"/>
     </svg>
     <div class="ring-center">
@@ -139,7 +344,7 @@
   </div>
 </div>
 
-<!-- S1: LOADING (skip Happy Birthday, go straight to cake after loading) -->
+<!-- S1: LOADING -->
 <div class="screen" id="s1">
   <div class="ld-heart">♥</div>
   <div class="ld-text" id="ldTxt">Wrapping your surprise with love...</div>
@@ -147,24 +352,24 @@
   <div class="ld-hint">✦ &nbsp; please wait &nbsp; ✦</div>
 </div>
 
-<!-- S3: CAKE (now screen index 2 in flow, but kept as s3 for ID) -->
+<!-- S3: CAKE -->
 <div class="screen" id="s3">
   <div class="cake-title">🎂 Tap the balloons!</div>
   <div class="cake-hint">✦ &nbsp; pop them all &nbsp; ✦</div>
   <div class="cake-stage">
-    <svg viewBox="0 0 280 230" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+    <svg viewBox="0 0 280 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
       <ellipse cx="140" cy="202" rx="110" ry="11" fill="#4a1a30" opacity=".5"/>
       <rect x="45" y="152" width="190" height="50" rx="8" fill="#ff6699"/>
       <rect x="45" y="147" width="190" height="11" rx="4" fill="#ffb3cc"/>
       <rect x="70" y="108" width="140" height="48" rx="8" fill="#ff3366"/>
       <rect x="70" y="103" width="140" height="11" rx="4" fill="#ffb3cc"/>
-      <rect x="95" y="68" width="90" height="40" rx="8" fill="#cc2255"/>
-      <rect x="95" y="63" width="90" height="11" rx="4" fill="#ffb3cc"/>
-      <circle cx="82" cy="178" r="5" fill="#fff" opacity=".45"/>
+      <rect x="95" y="68"  width="90"  height="40" rx="8" fill="#cc2255"/>
+      <rect x="95" y="63"  width="90"  height="11" rx="4" fill="#ffb3cc"/>
+      <circle cx="82"  cy="178" r="5" fill="#fff" opacity=".45"/>
       <circle cx="110" cy="170" r="4" fill="#fff" opacity=".45"/>
       <circle cx="170" cy="170" r="4" fill="#fff" opacity=".45"/>
       <circle cx="198" cy="178" r="5" fill="#fff" opacity=".45"/>
-      <circle cx="98" cy="128" r="4" fill="#fff" opacity=".45"/>
+      <circle cx="98"  cy="128" r="4" fill="#fff" opacity=".45"/>
       <circle cx="140" cy="122" r="4" fill="#fff" opacity=".45"/>
       <circle cx="182" cy="128" r="4" fill="#fff" opacity=".45"/>
       <rect x="111" y="44" width="9" height="24" rx="3" fill="#ffe066"/>
@@ -176,7 +381,7 @@
       <ellipse cx="139.5" cy="35" rx="3" ry="5" fill="#ff6600" opacity=".8"/>
       <ellipse cx="163.5" cy="41" rx="5" ry="7" fill="#ffcc00" opacity=".9"/>
       <ellipse cx="163.5" cy="39" rx="3" ry="5" fill="#ff6600" opacity=".8"/>
-      <text x="78" y="190" font-size="13" fill="#fff" opacity=".65">♥</text>
+      <text x="78"  y="190" font-size="13" fill="#fff" opacity=".65">♥</text>
       <text x="190" y="190" font-size="13" fill="#fff" opacity=".65">♥</text>
       <text x="102" y="143" font-size="11" fill="#fff" opacity=".65">♥</text>
       <text x="172" y="143" font-size="11" fill="#fff" opacity=".65">♥</text>
@@ -184,34 +389,38 @@
   </div>
   <div class="balloon-area" id="ballArea"></div>
   <div class="b-score" id="bScore">Pop all the balloons! 🎈</div>
-  <button class="btn" id="bNext" onclick="goTo('s4')" style="display:none; margin-top:4px;">Read your letter →</button>
+  <button class="btn" id="bNext" onclick="goTo('s4')" style="display:none;margin-top:4px">Read your letter →</button>
 </div>
 
-<!-- S4: WISH NOTE -->
-<div class="screen" id="s4">
-  <div class="envelope">
-    <div class="env-seal">♥</div>
-    <div class="env-date" id="envDate"></div>
-    <div class="env-dear">My dearest Love,</div>
-    <div class="env-body">
-      On your special day, I want you to know that you are the most beautiful, kind, and incredible person I have ever met. Every single day with you feels like a gift I never deserved.<br><br>
-      You make my world brighter just by being in it. Your smile is my favourite sight, your laugh is my favourite sound, and your love is my greatest treasure. 💖<br><br>
-      May this birthday bring you all the happiness you deserve — and may every day that follows be as magical as you are to me.
+<!-- S4: LETTER -->
+<div class="screen scroll" id="s4">
+  <div style="width:100%;display:flex;flex-direction:column;align-items:center;padding:52px 20px 36px">
+    <div class="envelope">
+      <div class="env-seal">♥</div>
+      <div class="env-date" id="envDate"></div>
+      <div class="env-dear">My dearest Love,</div>
+      <div class="env-body">
+        On your special day, I want you to know that you are the most beautiful, kind, and incredible person I have ever met. Every single day with you feels like a gift I never deserved.<br><br>
+        You make my world brighter just by being in it. Your smile is my favourite sight, your laugh is my favourite sound, and your love is my greatest treasure. 💖<br><br>
+        May this birthday bring you all the happiness you deserve — and may every day that follows be as magical as you are to me.
+      </div>
+      <div class="env-sign">With all my love ♥<br>Souvik Acharya</div>
     </div>
-    <div class="env-sign">With all my love ♥<br>Souvik Acharya</div>
+    <button class="btn" onclick="goTo('s5')" style="margin-top:28px;animation:none">Our Memories →</button>
   </div>
-  <button class="btn" onclick="goTo('s5')" style="margin-top:28px; animation:none;">Our Memories →</button>
 </div>
 
 <!-- S5: GALLERY -->
-<div class="screen" id="s5">
-  <div class="gal-title">Our Moments 💕</div>
-  <div class="gal-sub">✦ &nbsp; forever in my heart &nbsp; ✦</div>
-  <div class="gal-grid" id="galGrid"></div>
-  <button class="btn" onclick="goTo('s6')" style="animation:none;">The Final Note ♥</button>
+<div class="screen scroll" id="s5">
+  <div style="width:100%;display:flex;flex-direction:column;align-items:center;padding:36px 16px 36px">
+    <div class="gal-title">Our Moments 💕</div>
+    <div class="gal-sub">✦ &nbsp; forever in my heart &nbsp; ✦</div>
+    <div class="gal-grid" id="galGrid"></div>
+    <button class="btn" onclick="goTo('s6')" style="animation:none">The Final Note ♥</button>
+  </div>
 </div>
 
-<!-- S6: THANK YOU -->
+<!-- S6: THANKS -->
 <div class="screen" id="s6">
   <div class="th-icon">♥</div>
   <div class="th-big">Thank You</div>
@@ -225,12 +434,9 @@
 </div>
 
 <script>
-// Screen flow: s0 (countdown) → s1 (loading) → s3 (cake) → s4 (letter) → s5 (gallery) → s6 (thanks)
-// s2 (Happy Birthday screen) is completely removed from the flow
-const FLOW = ['s0', 's1', 's3', 's4', 's5', 's6'];
+const FLOW = ['s0','s1','s3','s4','s5','s6'];
 let curId = 's0';
 
-// Nav dots
 const nd = document.getElementById('navDots');
 FLOW.forEach((id, i) => {
   const d = document.createElement('div');
@@ -238,39 +444,38 @@ FLOW.forEach((id, i) => {
   d.onclick = () => goTo(id);
   nd.appendChild(d);
 });
-
 function updDots() {
   document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', FLOW[i] === curId));
 }
-
 function goTo(id) {
   document.getElementById(curId).classList.remove('active');
   curId = id;
-  document.getElementById(curId).classList.add('active');
+  const el = document.getElementById(curId);
+  el.classList.add('active');
+  el.scrollTop = 0;
   updDots();
   if (id === 's1') startLoad();
   if (id === 's3') setupBalloons();
-  if (id === 's4') document.getElementById('envDate').textContent = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+  if (id === 's4') document.getElementById('envDate').textContent = new Date().toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'});
   if (id === 's5') setupGallery();
   if (id === 's6') launchAllConfetti();
 }
 
 // Floating hearts
 const hb = document.getElementById('heartsBg');
-['♥','♡','💕','💗','💖'].forEach((ch) => {
+['♥','♡','💕','💗','💖'].forEach(ch => {
   for (let j = 0; j < 3; j++) {
     const h = document.createElement('div');
     h.className = 'heart-float';
     h.textContent = ch;
-    h.style.cssText = `left:${Math.random()*100}%;font-size:${14+Math.random()*16}px;animation-duration:${9+Math.random()*11}s;animation-delay:${Math.random()*9}s;color:hsl(${330+Math.random()*30},80%,${65+Math.random()*20}%)`;
+    h.style.cssText = `left:${Math.random()*100}%;font-size:${12+Math.random()*14}px;animation-duration:${9+Math.random()*11}s;animation-delay:${Math.random()*9}s;color:hsl(${330+Math.random()*30},80%,${65+Math.random()*20}%)`;
     hb.appendChild(h);
   }
 });
 
-// Countdown to March 14 2026
+// Countdown
 const TARGET = new Date('2026-03-14T00:00:00');
 const CIRC = 2 * Math.PI * 93;
-
 function updCD() {
   const diff = Math.max(0, TARGET - Date.now());
   const ts = Math.floor(diff / 1000);
@@ -285,11 +490,10 @@ function updCD() {
 }
 updCD();
 const cdTimer = setInterval(updCD, 1000);
-// If already past the target date, go straight to loading
 if (TARGET - Date.now() <= 0) { clearInterval(cdTimer); setTimeout(() => goTo('s1'), 400); }
 
-// Loading — goes directly to cake (s3), skipping Happy Birthday (s2)
-const ldMsgs = ['Wrapping your surprise with love...', 'Lighting the candles... ♥', 'Tying the balloons...', 'Sealing your letter...', 'Almost ready, my love! 💕'];
+// Loading
+const ldMsgs = ['Wrapping your surprise with love...','Lighting the candles... ♥','Tying the balloons...','Sealing your letter...','Almost ready, my love! 💕'];
 function startLoad() {
   let pct = 0, mi = 0;
   const bar = document.getElementById('ldBar'), txt = document.getElementById('ldTxt');
@@ -297,14 +501,16 @@ function startLoad() {
     pct += 1.8;
     bar.style.width = Math.min(pct, 100) + '%';
     if (pct > 0 && pct % 20 < 2 && mi < ldMsgs.length) txt.textContent = ldMsgs[mi++];
-    if (pct >= 100) { clearInterval(iv); setTimeout(() => goTo('s3'), 400); } // skip s2, go to s3
+    if (pct >= 100) { clearInterval(iv); setTimeout(() => goTo('s3'), 400); }
   }, 90);
 }
 
 // Balloons
 const bCols = [['#ff3366','#cc1144'],['#ff99bb','#cc6688'],['#ffcc00','#cc9900'],['#ff6699','#cc3366'],['#cc33ff','#9900cc']];
 let bPopped = 0;
-function bSVG(f, sh) { return `<svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="28" rx="22" ry="26" fill="${f}"/><ellipse cx="22" cy="18" rx="7" ry="5" fill="rgba(255,255,255,.35)" transform="rotate(-20,22,18)"/><polygon points="30,54 26,60 34,60" fill="${sh}"/><line x1="30" y1="60" x2="30" y2="78" stroke="${sh}" stroke-width="1.5"/></svg>`; }
+function bSVG(f, sh) {
+  return `<svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="28" rx="22" ry="26" fill="${f}"/><ellipse cx="22" cy="18" rx="7" ry="5" fill="rgba(255,255,255,.35)" transform="rotate(-20,22,18)"/><polygon points="30,54 26,60 34,60" fill="${sh}"/><line x1="30" y1="60" x2="30" y2="78" stroke="${sh}" stroke-width="1.5"/></svg>`;
+}
 function setupBalloons() {
   bPopped = 0;
   const area = document.getElementById('ballArea');
@@ -315,7 +521,9 @@ function setupBalloons() {
     const d = document.createElement('div');
     d.className = 'balloon';
     d.innerHTML = bSVG(c[0], c[1]);
-    d.onclick = () => popB(d);
+    // Both click and touch for mobile
+    d.addEventListener('click', () => popB(d));
+    d.addEventListener('touchstart', (e) => { e.preventDefault(); popB(d); }, { passive: false });
     area.appendChild(d);
   });
 }
@@ -340,27 +548,27 @@ function playPop() {
     g.gain.setValueAtTime(1, ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .15);
     src.buffer = buf; src.connect(g); g.connect(ctx.destination); src.start();
-  } catch (e) {}
+  } catch(e) {}
 }
 function confettiAt(el) {
   const r = el.getBoundingClientRect();
   const x = r.left + r.width / 2, y = r.top + r.height / 2;
   const cols = ['#ff3366','#ff99bb','#ffcc00','#ff6699','#fff','#cc33ff'];
-  for (let i = 0; i < 22; i++) {
+  for (let i = 0; i < 18; i++) {
     const p = document.createElement('div');
     p.className = 'confetti-p';
-    p.style.cssText = `left:${x+(Math.random()-.5)*70}px;top:${y}px;background:${cols[Math.floor(Math.random()*cols.length)]};transform:rotate(${Math.random()*360}deg);animation-duration:${.7+Math.random()*.9}s`;
+    p.style.cssText = `left:${x+(Math.random()-.5)*60}px;top:${y}px;background:${cols[Math.floor(Math.random()*cols.length)]};transform:rotate(${Math.random()*360}deg);animation-duration:${.7+Math.random()*.9}s`;
     document.body.appendChild(p);
     setTimeout(() => p.remove(), 2000);
   }
 }
 function launchAllConfetti() {
-  for (let i = 0; i < 70; i++) {
+  for (let i = 0; i < 60; i++) {
     setTimeout(() => {
       const p = document.createElement('div');
       p.className = 'confetti-p';
       const cols = ['#ff3366','#ff99bb','#ffcc00','#ff6699','#fff'];
-      p.style.cssText = `left:${Math.random()*100}vw;top:0px;background:${cols[Math.floor(Math.random()*cols.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-duration:${1+Math.random()*1.5}s`;
+      p.style.cssText = `left:${Math.random()*100}vw;top:0;background:${cols[Math.floor(Math.random()*cols.length)]};width:${5+Math.random()*8}px;height:${5+Math.random()*8}px;animation-duration:${1+Math.random()*1.5}s`;
       document.body.appendChild(p);
       setTimeout(() => p.remove(), 3000);
     }, i * 55);
@@ -383,6 +591,14 @@ function setupGallery() {
 setupGallery();
 
 function restart() { goTo('s0'); }
+
+// Prevent double-tap zoom on iOS
+let _lastTouch = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - _lastTouch < 300) e.preventDefault();
+  _lastTouch = now;
+}, { passive: false });
 </script>
 </body>
 </html>
